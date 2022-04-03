@@ -1,3 +1,4 @@
+import copy
 import json
 import logging
 
@@ -58,9 +59,10 @@ class DynamoDBStreamsProvider(DynamodbstreamsApi, ServiceLifecycleHook):
 
                 # Replace Kinesis ShardIDs with ones that mimic actual
                 # DynamoDBStream ShardIDs.
-                stream_shards = stream_details["StreamDescription"]["Shards"]
+                stream_shards = copy.deepcopy(stream_details["StreamDescription"]["Shards"])
                 for shard in stream_shards:
                     shard["ShardId"] = shard_id(stream_name, shard["ShardId"])
+                    shard.pop("HashKeyRange", None)
                 stream["Shards"] = stream_shards
                 return DescribeStreamOutput(**result)
         if not result:
